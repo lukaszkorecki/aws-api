@@ -180,6 +180,9 @@
   (testing "short expiration minimum is one minute"
     (let [c {:Expiration (minutes-from-now 3)}]
       (is (= 60 (credentials/calculate-ttl c)))))
+  (testing "supports Instants (expiration value from SSO /federation/credentials is a UNIX timestamp, parsable with Instant/ofEpochMilli"
+    (let [c {:Expiration  (Instant/parse (minutes-from-now 3))}]
+      (is (= 60 (credentials/calculate-ttl c)))))
   (testing "supports java.util.Date (return value from sts :AssumeRole)"
     (let [c {:Expiration (java.util.Date/from (Instant/parse (minutes-from-now 3)))}]
       (is (= 60 (credentials/calculate-ttl c))))))

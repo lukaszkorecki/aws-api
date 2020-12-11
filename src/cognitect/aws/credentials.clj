@@ -13,6 +13,7 @@
             [cognitect.aws.ec2-metadata-utils :as ec2])
   (:import (java.util.concurrent Executors ExecutorService ScheduledExecutorService
                                  ScheduledFuture TimeUnit ThreadFactory)
+           (java.util Date)
            (java.io File)
            (java.net URI)
            (java.time Duration Instant)))
@@ -250,8 +251,9 @@
   or a java.util.Date (returned from :AssumeRole on aws sts client)."
   [{:keys [Expiration] :as credentials}]
   (if Expiration
-    (let [expiration (if (inst? Expiration)
-                       (.toInstant Expiration)
+    (let [expiration (case (class Expiration)
+                       Instant Expiration
+                       Date (.toInstant Expiration)
                        (Instant/parse Expiration))]
       (max (- (.getSeconds (Duration/between (Instant/now) ^Instant expiration)) 300)
            60))
